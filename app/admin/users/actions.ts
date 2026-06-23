@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { actionError, actionSuccess, type ActionState } from "@/lib/action-state";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
@@ -16,11 +17,6 @@ const USER_STATUSES = new Set<UserStatus>(["active", "disabled"]);
 function getFormString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
-}
-
-function redirectWithParams(params: Record<string, string>): never {
-  const searchParams = new URLSearchParams(params);
-  redirect(`/admin/users?${searchParams.toString()}`);
 }
 
 async function requireAdminUser() {
@@ -47,7 +43,10 @@ async function requireAdminUser() {
   return user;
 }
 
-export async function createUserAction(formData: FormData) {
+export async function createUserAction(
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   await requireAdminUser();
 
   const fullName = getFormString(formData, "full_name");
@@ -56,7 +55,7 @@ export async function createUserAction(formData: FormData) {
   const role = getFormString(formData, "role") as UserRole;
 
   if (!fullName || !email || !password || !USER_ROLES.has(role)) {
-    redirectWithParams({ error: "Ism, email, parol va role to'g'ri kiriting." });
+    return actionError("Ism, email, parol va role to'g'ri kiriting.");
   }
 
   const admin = createAdminClient();
@@ -70,7 +69,7 @@ export async function createUserAction(formData: FormData) {
   });
 
   if (error || !data.user) {
-    redirectWithParams({ error: error?.message ?? "User yaratilmadi." });
+    return actionError(error?.message ?? "User yaratilmadi.");
   }
 
   const { error: profileError } = await admin.from("profiles").upsert({
@@ -81,14 +80,17 @@ export async function createUserAction(formData: FormData) {
   });
 
   if (profileError) {
-    redirectWithParams({ error: profileError.message });
+    return actionError(profileError.message);
   }
 
   revalidatePath("/admin/users");
-  redirectWithParams({ message: "User yaratildi." });
+  return actionSuccess("User yaratildi.");
 }
 
-export async function updateUserAction(formData: FormData) {
+export async function updateUserAction(
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   const currentUser = await requireAdminUser();
 
   const userId = getFormString(formData, "user_id");
@@ -96,11 +98,11 @@ export async function updateUserAction(formData: FormData) {
   const status = getFormString(formData, "status") as UserStatus;
 
   if (!userId || !USER_ROLES.has(role) || !USER_STATUSES.has(status)) {
-    redirectWithParams({ error: "Role yoki status noto'g'ri." });
+    return actionError("Role yoki status noto'g'ri.");
   }
 
   if (userId === currentUser.id && (role !== "admin" || status !== "active")) {
-    redirectWithParams({ error: "O'zingizni admin paneldan chiqarib bo'lmaydi." });
+    return actionError("O'zingizni admin paneldan chiqarib bo'lmaydi.");
   }
 
   const admin = createAdminClient();
@@ -114,7 +116,7 @@ export async function updateUserAction(formData: FormData) {
     const { data: authUser, error: authError } = await admin.auth.admin.getUserById(userId);
 
     if (authError || !authUser.user?.email) {
-      redirectWithParams({ error: authError?.message ?? "Auth user topilmadi." });
+      return actionError(authError?.message ?? "Auth user topilmadi.");
     }
 
     const fallbackName = authUser.user.email.split("@")[0] ?? "User";
@@ -126,16 +128,16 @@ export async function updateUserAction(formData: FormData) {
     });
 
     if (insertError) {
-      redirectWithParams({ error: insertError.message });
+      return actionError(insertError.message);
     }
   } else {
     const { error } = await admin.from("profiles").update({ role, status }).eq("id", userId);
 
     if (error) {
-      redirectWithParams({ error: error.message });
+      return actionError(error.message);
     }
   }
 
   revalidatePath("/admin/users");
-  redirectWithParams({ message: "User yangilandi." });
+  return actionSuccess("User yangilandi.");
 }
