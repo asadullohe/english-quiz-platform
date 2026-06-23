@@ -2,7 +2,7 @@
 
 ## Active
 
-- [ ] Step 3: Assignment Creation
+- [ ] Step 4: Student Question Submission
 
 ## Step 1: Clean Auth
 
@@ -26,16 +26,25 @@
 
 ## Step 3: Assignment Creation
 
-- [ ] Build `/assignments` real page.
-- [ ] Add create assignment action.
-- [ ] List assignments by role.
-- [ ] Show assignment status.
-- [ ] Add deadline display.
-- [ ] Run `pnpm typecheck`.
-- [ ] Run `pnpm lint`.
-- [ ] Run `pnpm build`.
+- [x] Build `/assignments` real page.
+- [x] Add create assignment action.
+- [x] List assignments by role.
+- [x] Show assignment status.
+- [x] Add deadline display.
+- [x] Run `pnpm typecheck`.
+- [x] Run `pnpm lint`.
+- [x] Run `pnpm build`.
+
+## Step 4: Student Question Submission
+
+- [ ] Add assignment detail or submission route.
+- [ ] Build question editor shell.
+- [ ] Support `single_choice` questions.
+- [ ] Support `text` answer questions.
+- [ ] Save draft questions.
+- [ ] Submit questions for review.
+- [ ] Show assignment progress against required count.
 
 ## Later
 
-- [ ] Step 4: Student Question Submission.
 - [ ] Step 5: Review Queue.

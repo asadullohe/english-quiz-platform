@@ -70,3 +70,39 @@ Notes:
 - Student join is limited to active student profiles.
 - Join code only works for active groups with invite enabled.
 - Existing removed student membership is reactivated by joining again.
+
+## 2026-06-23 - Step 3: Assignment Creation
+
+Completed:
+
+- Replaced `/assignments` placeholder with a real role-aware page.
+- Added assignment creation server action.
+- Added assignment status update action for reviewers/managers.
+- Added assignment client UI with create form, status selector, cards, deadlines, and progress stats.
+- Listed assignments by role:
+  - admin sees all groups.
+  - teacher sees own groups.
+  - support teacher sees assigned groups.
+  - student sees joined groups.
+- Added minimal `database.types.ts` coverage for levels, categories, group members, assignments, and questions.
+
+Changed files:
+
+- `app/assignments/actions.ts`
+- `app/assignments/assignments-client.tsx`
+- `app/assignments/page.tsx`
+- `lib/supabase/database.types.ts`
+- `outputs/next-tasks.md`
+- `outputs/project-roadmap.md`
+- `outputs/work-log.md`
+
+Verification:
+
+- Passed: `pnpm typecheck`
+- Passed: `pnpm lint`
+- Passed: `pnpm build`
+
+Notes:
+
+- Progress cards use existing `questions` records by `source_assignment_id`.
+- Student question submission is still pending and is the next step.

@@ -204,8 +204,8 @@ Done:
 
 Problems:
 
-- `lib/supabase/database.types.ts` is incomplete. It only includes `profiles`, `groups`, `notifications`.
-- Because DB types are incomplete, several admin/group queries use manual casts or untyped admin client.
+- `lib/supabase/database.types.ts` is still incomplete, but now includes the currently used MVP tables.
+- Because DB types are not generated from Supabase yet, several admin/group queries still use manual casts or untyped admin client.
 - No local Supabase CLI installed.
 - No automated migration verification.
 - No RLS tests.
@@ -222,9 +222,9 @@ Need next:
 
 Route: `/assignments`
 
-Status: placeholder only.
+Status: usable MVP.
 
-Need:
+Done:
 
 - Teacher/support create assignment.
 - Choose group.
@@ -232,13 +232,22 @@ Need:
 - Choose level/category.
 - Set questions per student.
 - Set deadline.
-- Track student progress.
+- List assignments by role.
+- Show assignment status.
 - Change status:
   - `open`
   - `reviewing`
   - `ready`
   - `used`
   - `archived`
+
+Need:
+
+- Track per-student completion progress.
+- Assignment detail route for submissions.
+- Better deadline edit/extend flow.
+- Notification when assignment is created.
+- Pagination/filtering.
 
 ### Student Question Creation
 
@@ -643,19 +652,19 @@ Done when:
 
 ## 6. Next Immediate Task
 
-Start with Step 3: Assignment Creation.
+Start with Step 4: Student Question Submission.
 
 Reason:
 
-- Auth cleanup and group membership MVP are complete for the current baseline.
-- Assignments are the next product link between teachers, groups, and student question submissions.
-- Student question creation needs assignments to exist first.
+- Auth, groups, and assignment creation are complete for the current MVP baseline.
+- Student-generated question submission is the core differentiator of the product.
+- Review queue needs pending questions to exist first.
 
 Suggested first file targets:
 
-- `app/assignments/page.tsx`
-- new `app/assignments/actions.ts`
-- new `app/assignments/assignments-client.tsx`
+- new assignment detail/submission route under `app/assignments`
+- new question editor client component
+- new question submission server actions
 - `lib/supabase/database.types.ts`
 
 ## 7. Current Verification Commands
