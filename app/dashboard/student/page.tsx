@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { StatCard } from "@/components/stat-card";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const navItems = [
@@ -26,10 +28,15 @@ export default function StudentDashboardPage() {
         <CardHeader>
           <CardTitle>Student flow</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>Invite code bilan groupga qo&apos;shiling.</p>
-          <p>Assignment bo&apos;yicha savol kiriting.</p>
-          <p>Reviewdan o&apos;tgan savollar keyingi darsdagi quizga tushadi.</p>
+        <CardContent className="flex flex-col gap-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <p>Invite code bilan groupga qo&apos;shiling.</p>
+            <p>Assignment bo&apos;yicha savol kiriting.</p>
+            <p>Reviewdan o&apos;tgan savollar keyingi darsdagi quizga tushadi.</p>
+          </div>
+          <Button asChild>
+            <Link href="/groups/join">Groupga qo&apos;shilish</Link>
+          </Button>
         </CardContent>
       </Card>
     </AppShell>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Bell, BookOpenCheck, LayoutDashboard, LogOut } from "lucide-react";
+import { logoutAction } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -68,10 +69,12 @@ export function AppShell({
                 <Bell className="mr-2 h-4 w-4" />
                 Bildirishnoma
               </Button>
-              <Button variant="ghost" size="sm">
-                <LogOut className="mr-2 h-4 w-4" />
-                Chiqish
-              </Button>
+              <form action={logoutAction}>
+                <Button variant="ghost" size="sm" type="submit">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Chiqish
+                </Button>
+              </form>
             </div>
           </header>
           {children}

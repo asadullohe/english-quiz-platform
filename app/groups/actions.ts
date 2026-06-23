@@ -55,6 +55,30 @@ async function requireGroupManager() {
   return profile;
 }
 
+async function requireActiveProfile() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/auth/login");
+  }
+
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("id, role, status")
+    .eq("id", user.id)
+    .single();
+  const profile = profileData as CurrentProfile | null;
+
+  if (!profile || profile.status !== "active") {
+    redirect("/auth/login");
+  }
+
+  return profile;
+}
+
 async function canManageGroup(groupId: string, profile: CurrentProfile) {
   if (profile.role === "admin") {
     return true;
@@ -286,4 +310,67 @@ export async function removeMemberAction(
 
   revalidatePath("/groups");
   return actionSuccess("Member olib tashlandi.");
+}
+
+export async function joinGroupByInviteAction(
+  _previousState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const profile = await requireActiveProfile();
+  const inviteCode = getFormString(formData, "invite_code").toUpperCase();
+
+  if (profile.role !== "student") {
+    return actionError("Invite code orqali faqat student qo'shiladi.");
+  }
+
+  if (!inviteCode) {
+    return actionError("Invite code kiriting.");
+  }
+
+  const admin = createAdminClient();
+  const { data: group, error: groupError } = await admin
+    .from("groups")
+    .select("id, name, invite_enabled, status")
+    .eq("invite_code", inviteCode)
+    .maybeSingle();
+
+  if (groupError) {
+    return actionError(groupError.message);
+  }
+
+  if (!group || group.status !== "active" || !group.invite_enabled) {
+    return actionError("Invite code topilmadi yoki yopilgan.");
+  }
+
+  const { data: existingMember } = await admin
+    .from("group_members")
+    .select("id, role, status")
+    .eq("group_id", group.id)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+
+  if (existingMember?.status === "active") {
+    return actionSuccess(`Siz allaqachon ${group.name} groupidasiz.`);
+  }
+
+  if (existingMember && existingMember.role !== "student") {
+    return actionError("Bu groupda siz uchun boshqa role biriktirilgan.");
+  }
+
+  const { error } = await admin.from("group_members").upsert({
+    group_id: group.id,
+    user_id: profile.id,
+    role: "student",
+    status: "active",
+    joined_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    return actionError(error.message);
+  }
+
+  revalidatePath("/groups");
+  revalidatePath("/dashboard/student");
+  revalidatePath(`/groups/${group.id}`);
+  return actionSuccess(`${group.name} groupiga qo'shildingiz.`);
 }

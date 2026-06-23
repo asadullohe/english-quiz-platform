@@ -1,18 +1,15 @@
-import Link from "next/link";
-import { loginAction } from "@/app/auth/actions";
-import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
+import { LoginForm } from "@/app/auth/auth-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { DASHBOARD_BY_ROLE, isDashboardRole } from "@/lib/auth/roles";
+import { getCurrentProfile } from "@/lib/auth/session";
 
-type LoginPageProps = {
-  searchParams?: Promise<{
-    error?: string;
-    message?: string;
-  }>;
-};
+export default async function LoginPage() {
+  const profile = await getCurrentProfile();
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const params = await searchParams;
+  if (profile?.status === "active" && isDashboardRole(profile.role)) {
+    redirect(DASHBOARD_BY_ROLE[profile.role]);
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
@@ -21,35 +18,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <CardTitle>Kirish</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={loginAction} className="space-y-4">
-            {params?.error ? (
-              <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {params.error}
-              </p>
-            ) : null}
-            {params?.message ? (
-              <p className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
-                {params.message}
-              </p>
-            ) : null}
-            <Input autoComplete="email" name="email" placeholder="Email" required type="email" />
-            <Input
-              autoComplete="current-password"
-              name="password"
-              placeholder="Parol"
-              required
-              type="password"
-            />
-            <Button className="w-full" type="submit">
-              Kirish
-            </Button>
-          </form>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Account yo&apos;qmi?{" "}
-            <Link className="font-semibold text-primary" href="/auth/register">
-              Ro&apos;yxatdan o&apos;tish
-            </Link>
-          </p>
+          <LoginForm />
         </CardContent>
       </Card>
     </main>

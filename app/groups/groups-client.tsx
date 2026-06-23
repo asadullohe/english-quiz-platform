@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useId, useRef, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import { ActionToast } from "@/components/action-toast";
@@ -267,6 +268,8 @@ function GroupCard({
   const [state, formAction, isPending] = useActionState(updateGroupAction, initialActionState);
   const teacherName = profilesById.get(group.teacher_id)?.full_name ?? "Teacher yo'q";
   const levelName = group.level_id ? levelsById.get(group.level_id)?.name : "Level yo'q";
+  const studentCount = members.filter((member) => member.role === "student").length;
+  const supportCount = members.filter((member) => member.role === "support_teacher").length;
 
   useRefreshOnSuccess(state);
 
@@ -279,6 +282,9 @@ function GroupCard({
             <CardTitle>{group.name}</CardTitle>
             <p className="mt-2 text-sm text-muted-foreground">
               {teacherName} / {levelName}
+            </p>
+            <p className="mt-2 text-xs font-semibold uppercase text-muted-foreground">
+              {studentCount} student / {supportCount} support
             </p>
           </div>
           <div className="rounded-2xl border px-4 py-2 text-sm">
@@ -329,6 +335,9 @@ function GroupCard({
         </div>
 
         <div className="flex flex-wrap gap-2">
+          <Button asChild size="sm" variant="outline">
+            <Link href={`/groups/${group.id}`}>Detail</Link>
+          </Button>
           <InviteButton groupId={group.id} />
         </div>
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { actionError, actionSuccess, type ActionState } from "@/lib/action-state";
 import { createClient } from "@/lib/supabase/server";
 import { DASHBOARD_BY_ROLE, isDashboardRole } from "@/lib/auth/roles";
 import type { Database } from "@/lib/supabase/database.types";
@@ -15,19 +16,41 @@ function getFormString(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function redirectWithParams(path: string, params: Record<string, string>): never {
-  const searchParams = new URLSearchParams(params);
-  redirect(`${path}?${searchParams.toString()}`);
+function mapAuthError(message: string | undefined, fallback: string) {
+  if (!message) {
+    return fallback;
+  }
+
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("invalid login credentials")) {
+    return "Email yoki parol noto'g'ri.";
+  }
+
+  if (normalized.includes("email not confirmed")) {
+    return "Email hali tasdiqlanmagan. Inboxni tekshiring.";
+  }
+
+  if (normalized.includes("user already registered") || normalized.includes("already registered")) {
+    return "Bu email bilan account allaqachon yaratilgan.";
+  }
+
+  if (normalized.includes("password")) {
+    return "Parol kamida 6 ta belgidan iborat bo'lishi kerak.";
+  }
+
+  return message;
 }
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   const email = getFormString(formData, "email");
   const password = getFormString(formData, "password");
 
   if (!email || !password) {
-    redirectWithParams("/auth/login", {
-      error: "Email va parolni kiriting.",
-    });
+    return actionError("Email va parolni kiriting.");
   }
 
   const supabase = await createClient();
@@ -37,9 +60,7 @@ export async function loginAction(formData: FormData) {
   });
 
   if (error || !data.user) {
-    redirectWithParams("/auth/login", {
-      error: error?.message ?? "Kirishda xatolik yuz berdi.",
-    });
+    return actionError(mapAuthError(error?.message, "Kirishda xatolik yuz berdi."));
   }
 
   const user = data.user;
@@ -52,29 +73,28 @@ export async function loginAction(formData: FormData) {
   const profile = profileData as LoginProfile | null;
 
   if (!profile) {
-    redirectWithParams("/auth/login", {
-      error: "Bu user uchun profile topilmadi.",
-    });
+    await supabase.auth.signOut();
+    return actionError("Bu user uchun profile topilmadi.");
   }
 
   if (profile.status !== "active" || !isDashboardRole(profile.role)) {
-    redirectWithParams("/auth/login", {
-      error: "Bu account platformaga kirish uchun faol emas.",
-    });
+    await supabase.auth.signOut();
+    return actionError("Bu account platformaga kirish uchun faol emas.");
   }
 
   redirect(DASHBOARD_BY_ROLE[profile.role]);
 }
 
-export async function registerAction(formData: FormData) {
+export async function registerAction(
+  _prevState: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   const fullName = getFormString(formData, "full_name");
   const email = getFormString(formData, "email");
   const password = getFormString(formData, "password");
 
   if (!fullName || !email || !password) {
-    redirectWithParams("/auth/register", {
-      error: "Ism familiya, email va parolni kiriting.",
-    });
+    return actionError("Ism familiya, email va parolni kiriting.");
   }
 
   const supabase = await createClient();
@@ -89,16 +109,18 @@ export async function registerAction(formData: FormData) {
   });
 
   if (error) {
-    redirectWithParams("/auth/register", {
-      error: error.message,
-    });
+    return actionError(mapAuthError(error.message, "Ro'yxatdan o'tishda xatolik yuz berdi."));
   }
 
   if (!data.session) {
-    redirectWithParams("/auth/login", {
-      message: "Account yaratildi. Email tasdiqlash kerak bo'lsa, inboxni tekshiring.",
-    });
+    return actionSuccess("Account yaratildi. Email tasdiqlash kerak bo'lsa, inboxni tekshiring.");
   }
 
   redirect("/dashboard/student");
+}
+
+export async function logoutAction() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/auth/login");
 }

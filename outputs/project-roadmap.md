@@ -44,7 +44,7 @@ Problems:
 
 ### Auth
 
-Status: partial.
+Status: mostly done for MVP.
 
 Done:
 
@@ -54,12 +54,13 @@ Done:
 - Register server action exists.
 - `/dashboard` redirects by profile role.
 - Profile role/status check exists.
+- Login/register use `useActionState` and toast feedback.
+- Logout action exists and AppShell logout is wired.
+- Active logged-in users are redirected away from login/register pages.
+- Common Supabase auth errors are mapped to Uzbek messages.
 
 Problems:
 
-- Login/register still use redirect with query params for messages.
-- No toaster for auth pages.
-- No logout action.
 - Register creates only student flow.
 - No password reset.
 - No email confirmation UI state.
@@ -68,10 +69,10 @@ Problems:
 
 Need next:
 
-- Convert auth login/register errors to `useActionState` + toast.
-- Add logout server action.
-- Add "already logged in" redirect from `/auth/login` and `/auth/register`.
-- Add auth error mapping in Uzbek.
+- Expand auth error mapping in Uzbek as more cases appear.
+- Add password reset.
+- Add explicit email confirmation UI state.
+- Add tests for role redirects.
 
 ### Admin User Control
 
@@ -113,7 +114,7 @@ Need next:
 
 ### Groups
 
-Status: usable MVP, but not complete.
+Status: usable MVP.
 
 Done:
 
@@ -136,24 +137,25 @@ Done:
 - Member can be removed by setting status `removed`.
 - Toast success/error.
 - No message in URL.
+- Student can join active groups by invite code.
+- Students/support teachers can see their visible groups.
+- Group detail route `/groups/[id]` exists.
+- Members are shown grouped by role in group detail.
+- Student dashboard has join group CTA.
+- Basic group stats exist.
 
 Problems:
 
-- No student "join by invite code" flow.
-- No invite code validation page/form.
-- No group detail route.
 - No member search.
 - No duplicate member UI handling.
 - No role-specific UI polish for students/support teachers.
-- No group stats.
 - No hard delete/archive member history view.
 
 Need next:
 
-- Add student join group by invite code.
-- Add group detail page `/groups/[id]`.
 - Add member list filters.
-- Add group dashboard stats.
+- Add duplicate member UI handling.
+- Polish role-specific group empty states.
 
 ### Database Schema
 
@@ -641,22 +643,20 @@ Done when:
 
 ## 6. Next Immediate Task
 
-Start with Step 1: Clean Auth.
+Start with Step 3: Assignment Creation.
 
 Reason:
 
-- Auth affects every later module.
-- Current auth messages still use URL params.
-- Logout missing.
-- AppShell logout button fake.
+- Auth cleanup and group membership MVP are complete for the current baseline.
+- Assignments are the next product link between teachers, groups, and student question submissions.
+- Student question creation needs assignments to exist first.
 
 Suggested first file targets:
 
-- `app/auth/actions.ts`
-- `app/auth/login/page.tsx`
-- `app/auth/register/page.tsx`
-- `components/app-shell.tsx`
-- new `app/auth/auth-client.tsx` or split login/register client components
+- `app/assignments/page.tsx`
+- new `app/assignments/actions.ts`
+- new `app/assignments/assignments-client.tsx`
+- `lib/supabase/database.types.ts`
 
 ## 7. Current Verification Commands
 
@@ -667,4 +667,3 @@ pnpm typecheck
 pnpm lint
 pnpm build
 ```
-
