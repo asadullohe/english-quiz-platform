@@ -323,11 +323,16 @@ function AssignmentCard({
         </div>
         <div className="flex flex-col gap-3 text-sm md:flex-row md:items-center md:justify-between">
           <p className={deadlineTone}>{formatDeadline(assignment.deadline_at)}</p>
-          <p className="text-muted-foreground">
-            {assignment.share_approved_to_public_bank
-              ? "Approved savollar public bankka tushadi."
-              : "Approved savollar faqat group ichida qoladi."}
-          </p>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <p className="text-muted-foreground">
+              {assignment.share_approved_to_public_bank
+                ? "Approved savollar public bankka tushadi."
+                : "Approved savollar faqat group ichida qoladi."}
+            </p>
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/assignments/${assignment.id}`}>Ochish</Link>
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

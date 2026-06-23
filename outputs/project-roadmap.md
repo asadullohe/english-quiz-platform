@@ -251,9 +251,9 @@ Need:
 
 ### Student Question Creation
 
-Status: not implemented.
+Status: usable MVP.
 
-Need:
+Done:
 
 - Student sees active assignments.
 - Student submits required number of questions.
@@ -264,106 +264,150 @@ Need:
 - Mark correct option.
 - Add acceptable text answers.
 - Add tags.
-- Add optional media.
 - Save draft.
 - Submit for review.
+
+Need:
+
+- Edit existing draft content.
+- Add optional media.
+- Show richer per-student assignment progress.
+- Enforce max submissions if teacher wants strict limits.
+- Add better duplicate/quality checks before submit.
 
 ### Review Queue
 
 Route: `/review/questions`
 
-Status: placeholder only.
+Status: usable MVP.
 
-Need:
+Done:
 
 - Teacher/support sees pending questions by assigned groups.
 - Review actions:
   - approve
   - needs changes
   - reject
-  - flag
-  - archive
-- Edit question content.
-- Add internal/student-visible comments.
 - Write `question_review_events`.
+- Show question content, options/text answers, tags, explanation, group, assignment, creator.
+- Needs changes/rejected comments are required.
+- Approved questions get `approved_by_user_id` and `approved_at`.
+- Support teacher cannot review own submitted question.
+
+Need:
+
+- Reviewer edit question content.
+- Add flag/archive actions.
 - Notify student.
+- Show review event timeline.
 
 ### Question Bank
 
 Route: `/question-bank`
 
-Status: placeholder only.
+Status: usable MVP.
 
-Need:
+Done:
 
 - List approved questions.
 - Filter by level/category/tags.
 - Filter public/group_only.
-- Exclude own questions where needed.
 - Show source group/assignment.
 - Show media badges.
+- Show answer preview for single choice/text answers.
+- Enforce role-aware visibility for `group_only` questions.
+
+Need:
+
+- Better search/pagination beyond first 100 approved questions.
+- Exclude own questions where needed for self practice.
+- More compact selection UI for quiz builder.
+- Report question flow from bank.
 
 ### Quiz Builder
 
 Route: `/quizzes`
 
-Status: placeholder only.
+Status: usable MVP.
 
-Need:
+Done:
 
 - Teacher creates quiz template.
 - Pick questions from assignment approved set.
 - Search question bank.
-- Reorder questions.
 - Set duration.
 - Set feedback mode.
 - Save draft/active/archive.
+
+Need:
+
+- Reorder questions.
+- Edit existing templates.
+- Better search/filter in question picker.
+- Compact selected-question summary.
+- Template detail route.
 
 ### Live Sessions
 
 Route: `/sessions`
 
-Status: placeholder only.
+Status: usable management MVP.
 
-Need:
+Done:
 
 - Create live session from quiz template.
 - Waiting room.
 - Session code.
-- Participant list.
 - Manual start.
 - Freeze question order into snapshots.
-- Late join with remaining time.
 - End session.
+
+Need:
+
+- Participant list.
+- Late join with remaining time.
 - Remove participant.
 - Realtime or polling progress.
+- Student/guest join route.
+- Quiz-taking runtime.
 
 ### Quiz Taking
 
-Status: not implemented.
+Status: usable MVP.
 
-Need:
+Done:
 
 - Student joins session.
 - Student answers questions.
-- Timer.
-- Auto-submit on timeout.
-- Retry wrong questions if configured.
 - Save answers.
 - Prevent duplicate submit.
 
+Need:
+
+- Timer.
+- Auto-submit on timeout.
+- Retry wrong questions if configured.
+- Stronger guest attempt access model.
+- Better submitted result screen.
+
 ### Results / Analytics
 
-Status: not implemented.
+Status: usable MVP.
 
-Need:
+Done:
 
 - Per-student result.
 - Per-question stats.
 - Correct/wrong counts.
 - Teacher session report.
 - CSV export.
+
+Need:
+
+- Richer student result history.
 - Answer review events.
+- Better CSV route for large reports.
+- Charts/visual analytics.
 
 ### Self Practice
 
@@ -652,19 +696,18 @@ Done when:
 
 ## 6. Next Immediate Task
 
-Start with Step 4: Student Question Submission.
+Start with Step 10: Self Practice.
 
 Reason:
 
-- Auth, groups, and assignment creation are complete for the current MVP baseline.
-- Student-generated question submission is the core differentiator of the product.
-- Review queue needs pending questions to exist first.
+- Live classroom loop now reaches results.
+- Self practice is the next student-facing reuse of approved question bank.
+- Practice history table already exists in schema.
 
 Suggested first file targets:
 
-- new assignment detail/submission route under `app/assignments`
-- new question editor client component
-- new question submission server actions
+- `app/self-practice/page.tsx`
+- new self-practice actions/client
 - `lib/supabase/database.types.ts`
 
 ## 7. Current Verification Commands
